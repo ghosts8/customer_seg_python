@@ -1,0 +1,192 @@
+Telling the Story around Customer Segmentation
+
+We have data from an FMCG store and we would like to analyse the data that we have been given to
+develop the brand strategy. We would like to know the Purchase probability, Branch Choice Probabiliy
+and, Purchase Quantity.
+
+We start off by importing the data and looking for any missing values, closely followed by
+describing the data - looking for means/standard deviations etc. to get a better understanding
+about the data that we hold.
+
+WHY have I done the above? To get a better understanding on the variance of the data.
+Eg: How the age ranges, how the salary changes.
+
+Upon a quick analysis of the data, correlation matrices and heat maps are a great way of seeing how each feature
+varies with eachother, and allows us to start painting a picture about the dataset such as the older
+you are, the more money you seem to have.
+
+Plotting scatter plots, is also a good way to see the correlation of two features on a point level,
+as opposed to a single correlation value.
+
+Upon further analysis of the data, we realise that the some of our features have different orders
+of magnitude. To allow for comparison we standardize our data. This will give us features whos
+mean is now 0 and has an SD of 1. One could also normalize, which would give us values between
+0-1, but this causes us to lose a level of variance.
+
+We are now going to look at computing the clusters to identify most similar individuals, and put
+them into similar categories. This is achieved through the use of K-Means clustering.
+
+The first step now is to understand how many clusters we have in our dataset. This is achieved
+by looking at the Within Cluster Sum of Squares (WCSS). We would expect that the more clusters
+we have, the lower the WCSS. This is because we are grouping points in tighter groups, decreasing
+the distance between the centroid and the observation.
+
+As a result, if we calculate the WCSS for a range of cluster amounts, and plot the WCSS on a graph,
+we can see how the WCSS changes with the amount of clusters, and then make a decision on how many
+clusters we think we should have. In this case, I have chosen the cluster where the percentage change
+of the gradient is greatest.
+
+Let's now analyse the data within each cluster.
+We can take the mean of each feature, per cluster to see what differences we get.
+Upon analysing the means, we can make assumptions on the types of buyers we have. Which then allows
+us to plot say, Age and Income, and add our cluster groupings to the scatter plot.
+
+At this point, we could continue on to do some more statistical analysis, but we are going to
+perform some PCA to reduce the dimensionality of the problem.
+
+=======
+
+PCA, principal components analysis, attempts to reduce dimensionality by plotting all points on a
+scatter graph, and using linear algebra, adding a plane which best fits the data.
+Eg: take 3 features and plot them all. A plance is then added which best fits the data. This plane
+is 2 dimensional and lies on 2 separate axes, and therefore reduces the complexity of the problem.
+
+In doing this, some of the variance is lost, but the complexity is decreased.
+Having calculated the PC, we have decided that the 3 first components explained enough of the variance.
+
+We would now like to understand what these first 3 components tell us about our original features.
+We therefore extract the components from the pca instance we created, which returns the loadings
+for each component. The loadings are the correlation between the original feature value, and the
+pca value calculated.
+Eg: We can see that the for component 1, Income, Occupation and Settlement Size are all most
+correlated with Component 1, which leads us to believe that this component relates more to the
+a person's career.
+
+Once we are done looking into the components, we need to see how each component relates back to
+the original features. This can be obtained by using the transform method from the pca instance,
+using our original standardized dataset. We now have a representation of where each person sits
+within our 3 components.
+
+Remember that the components are in order of importance eg: Component 1 explains most of the
+variance of the data. Component 2 is the second most important and explaining variance.
+
+Based on the obsevations we made before, we said that Component 1 was a measure of someones career,
+Component 2 was a measure of someones Education Lifestyle, and Component 3 was a measure of someones
+Experience (whether it be in Career or General).
+
+With that in mind, lets assign categories using the components. We can see that Component 1 and 2
+are quite high for all features. This leads us to think that they are part of the "Well Off" Group. 
+The second group, scores low in both components 1 and 2, but seems to be higher on the experience
+side. This could be the "Fewer Opportunities" group.
+The third group, scores high in the Education Lifestyle, which could mean they sit in the 
+"Standard".
+Finally, the fourth group scores highly in the Component 1, but not so high in the other two,
+leading us to believe these are the "Career Focused" individuals.
+
+If we plot the two most important components against eachother we can see that there are more clear
+clusters forming. PCA allowed us to do this by reducing the number of features overall, and 
+packing them into fewer, more meaningful features.
+On top of this, the features are orthogonal. This means the difference between the components is as
+big as possible.
+ 
+Data has now been pickled and saved for deployment later.
+
+=======
+
+Purchase Analytics
+
+Start by visually analyzing the dataset, and check the differences with the previous dataset.
+We'll also use the segmentation model we built to segment new customers.
+
+The new dataset is more around the TRANSACTIONS per row, as opposed to the CUSTOMER per row.
+Therefore, there is a possibility that we have multiple customers per row.
+Can get scanner panel data from Neilson, or IRI.
+
+The data consists of 500 unique individuals for the last 2 years.
+
+Let's remember what we are currently looking for:
+- The Probabiliy of someone buying something
+- Which brand is going to be bought
+- How many units are going to be bought
+
+We don't have an equal number of rows per customer and we don't have an equal number of records
+per day. Therefore, using descriptive stats is not useful.
+
+We need to import the scaler, pca, and kmeans pickle files to apply the models and extract the
+segments from the new datset.
+
+Let's start analysing the data per customer.
+If we look at the Segment categories, 
+0 was Well-Off, 
+1 was Fewer-Opportunities, 
+2 was Career-Focused,
+3 was Standard
+
+If we check the barcharts we can see that Segment 1 makes up the majority of visitors, followed
+by Segment 3. Inherently this results in a larger absolute number of purchases of chocolate bars.
+Lets look at the Purchase Frequency which tells you the probability of purchasing a chocolate bar,
+if they visit the store. We can see that those with fewer opportunities make more frequenct visits
+but are the least likely to buy a chocolate bar. The standard category has been identified to
+be the most likely to buy chocolate bars, even though they visit the stores least frequently.
+These insights are being made on the broad assumption that the sample we are analysing, is 
+representative of the population.
+
+Now that we know how the segments behave, let's have a look at which brand each segment is most
+likely to buy. This is achieved by splitting out the "brand" column into separate columns and taking
+the mean of all those columns per segment. We can then create a heatmap to analyse the results.
+Well-off is more inclined to eat from Brand 4, fewer opportunities will go for brand 2,
+Standard also like brand 2 but are also open to eating some of the other brands, and finally,
+Career-focused predominantly eat Brand 5.
+
+It's all well and good to know which brands are consumed by which segments, but how much revenue
+is each segment bringing in.
+Revenue also known as sales or turnover is equal to the number of items sold * the price of the
+item at that point in time.
+Revenue(i) = P(i) * Q(i)
+
+Note that whenever no purchase occurred, the purchase quantity would be zero. Moreover, our dataset
+has been created with the assumption that only one brand is bought at a transaction. 
+
+Having split the data into revenue for each brand, per segment, we can start to see which of the 
+segments are spending the most money, and on which brand.
+
+Findings analysis:
+    If we take the total spend for each segment, we can see that the Career-Focused individuals are
+    spending the most, followed closely by those that are Well-Off, even thought they don't make up
+    the largest group of individuals (Fewer-Opportunities). The Standard segment accounts for the 
+    smallest revenue.
+
+    Looking at both the Segment size and the Revenue is important. It is telling us that even though
+    some of the segments aren't the largest, they are generating the most revenue.
+    Chocolate bar prices are in ascending order.
+
+    If we are marketers for each brand, we are probably interested in he revenue per brand.
+    If we look at Brand 3, we can see that Standard makes up the greatest revenue. Is it worth
+    decreasing the price to see a further increase in the sales?
+    Looking at Brand 4, we can see those that are Well-Off don't seem to mind paying a premium,
+    and seem to be more loyal. As a result, is it worth slightly increasing the price?
+
+     
+=======
+
+Purchase Probability model
+
+Let's revist the three questions we were looking for at the beginning of the course.
+
+(1) Purchase Probability - Will a customer buy a product from a particular product category when
+they enter the shop. 
+(2) Brand Choice probability - 
+(3) Purchase Quantity
+
+For (1) We are going to use a statistical model to estimate the purchase probability
+for each customer at each shopping trip.
+Then we'll calculate price elasticity of purchase probability under different conditions. 
+
+Let's understand the dataset:
+    When a customer visits the store, we call that a purchase occasion. The customer may
+    or may not purchase a product from the product category we're interested in.
+
+    We know that each row represents a store visit. The incidence is a flag is binary,
+    and tells us whether purchase for a chocolate bar was made.
+
+
